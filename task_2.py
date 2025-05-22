@@ -1,20 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import List
-import logging
+from logger import logger
 
-logging.basicConfig(
-    format='%(asctime)s %(message)s',
-    level=logging.DEBUG,
-        handlers=[
-        logging.FileHandler("program.log"),
-        logging.StreamHandler()
-    ])
 
 class Book:
     def __init__(self, title: str, author: str, year: str) -> None:
         self.title = title
         self.author = author
         self.year = year
+
 
 class LibraryInterface(ABC):
     @abstractmethod
@@ -33,6 +27,7 @@ class LibraryInterface(ABC):
     def book_exists(self, title: str) -> bool:
         pass
 
+
 class Library(LibraryInterface):
     def __init__(self) -> None:
         self.books: List[Book] = []
@@ -49,24 +44,29 @@ class Library(LibraryInterface):
     def book_exists(self, title: str) -> bool:
         return any(book.title == title for book in self.books)
 
+
 class BookDisplayInterface(ABC):
     @abstractmethod
     def display_books(self, books: List[Book]) -> None:
         pass
 
+
 class ConsoleBookDisplay(BookDisplayInterface):
     def display_books(self, books: List[Book]) -> None:
         if not books:
-            logging.info("No books in the library.")
+            logger.info("No books in the library.")
             return
 
         for book in books:
-            logging.info(
+            logger.info(
                 f"Title: {book.title}, Author: {book.author}, Year: {book.year}"
             )
 
+
 class LibraryManager:
-    def __init__(self, library: LibraryInterface, display: BookDisplayInterface) -> None:
+    def __init__(
+        self, library: LibraryInterface, display: BookDisplayInterface
+    ) -> None:
         self.library = library
         self.display = display
 
@@ -84,6 +84,7 @@ class LibraryManager:
         books = self.library.get_all_books()
         self.display.display_books(books)
 
+
 def main() -> None:
     library = Library()
     display = ConsoleBookDisplay()
@@ -98,19 +99,20 @@ def main() -> None:
                 author = input("Enter book author: ").strip()
                 year = input("Enter book year: ").strip()
                 manager.add_book(title, author, year)
-                logging.info(f"Book '{title}' by {author} ({year}) added successfully.")
+                logger.info(f"Book '{title}' by {author} ({year}) added successfully.")
             case "remove":
                 title = input("Enter book title to remove: ").strip()
                 if manager.remove_book(title):
-                    logging.info(f"Book '{title}' removed successfully.")
+                    logger.info(f"Book '{title}' removed successfully.")
                 else:
-                    logging.info(f"Book '{title}' not found in the library.")
+                    logger.info(f"Book '{title}' not found in the library.")
             case "show":
                 manager.show_books()
             case "exit":
                 break
             case _:
-                logging.info("Invalid command. Please try again.")
+                logger.info("Invalid command. Please try again.")
+
 
 if __name__ == "__main__":
     main()
